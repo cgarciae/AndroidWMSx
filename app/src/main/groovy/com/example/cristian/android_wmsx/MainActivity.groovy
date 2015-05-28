@@ -1,4 +1,4 @@
-package com.example.cristian.groovytest;
+package com.example.cristian.android_wmsx;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -16,6 +16,14 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        def textView = (TextView) findViewById(R.id.textView)
+        def button = (Button)findViewById(R.id.button)
+
+        def n = 0
+        button.onClickListener = {
+            textView.text = "Clicked ${n++} times!"
+        }
     }
 
     @Override

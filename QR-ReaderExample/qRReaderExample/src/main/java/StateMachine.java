@@ -10,23 +10,42 @@ public class StateMachine<A,B> extends StateBehaviour<A,B> implements Stream<A> 
     HashMap<A,StateBehaviour<A,B>> stateMap = new HashMap<A,StateBehaviour<A,B>>();
     LinkedList<Action1<A>> onDataListeners = new LinkedList<Action1<A>>();
 
-    public StateMachine(StateBehaviour<A,B> initialState, StateBehaviour<A,B>... states) {
-        super(initialState.key);
-        init(initialState, states);
+
+
+    public StateMachine (StateBehaviour<A,B>... states) throws Exception {
+        super(states[0].key);
+        init(states);
     }
 
-    public StateMachine(A key, StateBehaviour<A,B> initialState, StateBehaviour<A,B>... states) {
+    public StateMachine (A key, StateBehaviour<A,B>... states) throws Exception {
         super(key);
-        init(initialState, states);
+        init(states);
     }
 
-    void init (StateBehaviour<A,B> initialState, StateBehaviour<A,B>... states ) {
-        state = initialState;
-        state.onEnter(state.key);
+    void init (StateBehaviour<A,B>... states) throws Exception{
+        state = states[0];
 
         for (StateBehaviour<A,B> stateBehaviour : states) {
-            stateMap.put(stateBehaviour.key, stateBehaviour);
+            addState (stateBehaviour);
         }
+    }
+
+    public void Start () {
+        state.onEnter(state.key);
+    }
+
+    public void addState (StateBehaviour<A,B> newState) throws Exception{
+
+        if (stateMap.containsKey(newState.key)) {
+            throw new Exception("key already exists");
+        }
+        stateMap.put(newState.key, newState);
+    }
+
+    public StateBehaviour<A,B> getNewState (A stateKey) throws Exception {
+        StateBehaviour<A,B> newState = new StateBehaviour<A,B>(stateKey);
+        addState(newState);
+        return newState;
     }
 
     @Override

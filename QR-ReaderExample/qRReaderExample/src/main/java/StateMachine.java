@@ -22,6 +22,8 @@ public class StateMachine<A,B> extends StateBehaviour<A,B> implements Stream<A> 
         init(states);
     }
 
+    public StateBehaviour<A,B> getState () {return state;}
+
     void init (StateBehaviour<A,B>... states) throws Exception{
         state = states[0];
 
@@ -30,7 +32,7 @@ public class StateMachine<A,B> extends StateBehaviour<A,B> implements Stream<A> 
         }
     }
 
-    public void Start () {
+    public void start() {
         state.onEnter(state.key);
     }
 
@@ -49,16 +51,16 @@ public class StateMachine<A,B> extends StateBehaviour<A,B> implements Stream<A> 
     }
 
     @Override
-    public A onNewData(B value) {
+    public A move(B value) {
         //Logica de StateMachine
         handleData(value);
         //Logica de StateBehaviour
-        return super.onNewData(value);
+        return super.move(value);
     }
 
     void handleData (B value) {
         //Pasar datos al estado actual
-        A newKey = state.onNewData(value);
+        A newKey = state.move(value);
 
         //Parar si el "key" es el mismo
         if (newKey == state.key)

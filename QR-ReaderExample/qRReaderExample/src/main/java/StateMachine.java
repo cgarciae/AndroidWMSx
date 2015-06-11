@@ -6,6 +6,7 @@ import java.util.LinkedList;
  */
 public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A> {
 
+    public final StateBehaviour<A,B> initialState;
     private StateBehaviour<A,B> state;
     HashMap<A,StateBehaviour<A,B>> stateMap = new HashMap<>();
     LinkedList<Action1<A>> onDataListeners = new LinkedList<>();
@@ -13,6 +14,7 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
 
     public StateMachine (K key, StateBehaviour<A,B> initialState, StateBehaviour<A,B>... states) throws Exception {
         super(key);
+        this.initialState = initialState;
         init(initialState, states);
     }
 
@@ -103,6 +105,11 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
     @Override
     public void OnData(Action1<A> action) {
         onDataListeners.add (action);
+    }
+
+    public void restart () {
+        started = false;
+        state = initialState;
     }
 }
 

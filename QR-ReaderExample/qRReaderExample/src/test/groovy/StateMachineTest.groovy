@@ -27,7 +27,7 @@ public class StateMachineTest extends TestCase {
 
 
     public void tearDown() {
-        System.out.println("@After - tearDown");
+
     }
 
 

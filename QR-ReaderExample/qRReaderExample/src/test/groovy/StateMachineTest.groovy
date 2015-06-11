@@ -7,14 +7,14 @@ import junit.framework.TestCase
 @CompileStatic
 public class StateMachineTest extends TestCase {
 
-    StateMachine<State, Direction> stateMachine;
+    StateMachine<State,State, Direction> stateMachine;
     StateBehaviour<State, Direction> stateOne;
     StateBehaviour<State, Direction> stateTwo;
 
     public void setUp () throws Exception {
         stateOne = new StateBehaviour<State, Direction>(State.One);
         stateTwo = new StateBehaviour<State, Direction>(State.Two);
-        stateMachine = new StateMachine<State, Direction>(State.Zero, [stateOne, stateTwo] as StateBehaviour[]);
+        stateMachine = new StateMachine<State, State, Direction>(State.Zero, stateOne, [stateTwo] as StateBehaviour[]);
 
         stateOne.addTransition({Direction n ->
             n > Direction.None ? State.Two : State.One;
@@ -47,7 +47,6 @@ public class StateMachineTest extends TestCase {
     }
 
     public void testCambiarEstado() throws Exception {
-        stateMachine.start();
 
         stateMachine.move(Direction.None);
         assertEquals(stateMachine.state, stateOne);
@@ -69,8 +68,6 @@ public class StateMachineTest extends TestCase {
             assertEquals(oldState, State.One);
         });
 
-        stateMachine.start();
-
         stateMachine.move(Direction.Up);
         assertEquals(stateMachine.state, stateTwo);
         assertEquals(entered && exited, true);
@@ -82,9 +79,19 @@ public class StateMachineTest extends TestCase {
         stateOne.addOnDataListener({Direction dir ->
             called = true;
         });
-        stateMachine.start();
+
         stateMachine.move(Direction.Up);
         assertEquals(called, true);
+    }
+
+    public void testSubMachine () {
+
+        StateMachine<State, State, Direction> superMachine = new StateMachine<State, State, Direction>(State.Zero, stateMachine);
+        StateMachine<State, State, Direction> super2Machine = new StateMachine<State, State, Direction>(State.Zero, superMachine);
+
+        super2Machine.move(Direction.Up);
+
+        assertEquals(stateMachine.state, stateTwo);
     }
 
     enum Direction {

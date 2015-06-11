@@ -4,36 +4,45 @@ import java.util.LinkedList;
 /**
  * Created by Cristian on 6/5/2015.
  */
-public class StateMachine<A,B> extends StateBehaviour<A,B> implements Stream<A> {
+public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A> {
 
     private StateBehaviour<A,B> state;
-    HashMap<A,StateBehaviour<A,B>> stateMap = new HashMap<A,StateBehaviour<A,B>>();
-    LinkedList<Action1<A>> onDataListeners = new LinkedList<Action1<A>>();
+    HashMap<A,StateBehaviour<A,B>> stateMap = new HashMap<>();
+    LinkedList<Action1<A>> onDataListeners = new LinkedList<>();
 
 
-
-    public StateMachine (StateBehaviour<A,B>... states) throws Exception {
-        super(states[0].key);
-        init(states);
-    }
-
-    public StateMachine (A key, StateBehaviour<A,B>... states) throws Exception {
+    public StateMachine (K key, StateBehaviour<A,B> initialState, StateBehaviour<A,B>... states) throws Exception {
         super(key);
-        init(states);
+        init(initialState, states);
     }
 
-    public StateBehaviour<A,B> getState () {return state;}
-
-    void init (StateBehaviour<A,B>... states) throws Exception{
-        state = states[0];
+    void init (StateBehaviour<A,B> initialState, StateBehaviour<A,B>... states) throws Exception{
+        state = initialState;
+        addState(initialState);
 
         for (StateBehaviour<A,B> stateBehaviour : states) {
             addState (stateBehaviour);
         }
     }
 
+    public StateBehaviour<A,B> getState () {return state;}
+
+    @Override
     public void start() {
+        super.start();
+        state.start();
+    }
+
+    @Override
+    public void onEnter(K value) {
+        super.onEnter(value);
         state.onEnter(state.key);
+    }
+
+    @Override
+    public void onExit(K value) {
+        super.onExit(value);
+        state.onExit(state.key);
     }
 
     public void addState (StateBehaviour<A,B> newState) throws Exception{
@@ -45,13 +54,17 @@ public class StateMachine<A,B> extends StateBehaviour<A,B> implements Stream<A> 
     }
 
     public StateBehaviour<A,B> getNewState (A stateKey) throws Exception {
-        StateBehaviour<A,B> newState = new StateBehaviour<A,B>(stateKey);
+        StateBehaviour<A,B> newState = new StateBehaviour<>(stateKey);
         addState(newState);
         return newState;
     }
 
     @Override
-    public A move(B value) {
+    public K move(B value) {
+
+        if (! started)
+            start();
+
         //Logica de StateMachine
         handleData(value);
         //Logica de StateBehaviour
@@ -77,13 +90,13 @@ public class StateMachine<A,B> extends StateBehaviour<A,B> implements Stream<A> 
         state = newState;
 
         //Anunciar cambio de estado como stream de "keys"
-        for (Action1<A> f : new LinkedList<Action1<A>> (onDataListeners)) {
+        for (Action1<A> f : new LinkedList<> (onDataListeners)) {
             f.apply (newKey);
         }
     }
 
     @Override
-    public A getKey() {
+    public K getKey() {
         return key;
     }
 

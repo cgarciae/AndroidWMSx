@@ -12,6 +12,7 @@ public class StateBehaviour<A,B> {
     ArrayList<Action1<A>> onExitList = new ArrayList<Action1<A>>();
     ArrayList<Action1<B>> onDataList = new ArrayList<Action1<B>> ();
     ArrayList<Func1<B,A>> transitions = new ArrayList<Func1<B,A>>();
+    protected Boolean started = false;
 
 
     public StateBehaviour(A key) {
@@ -91,5 +92,12 @@ public class StateBehaviour<A,B> {
         return this;
     }
 
+    public void start() {
 
+        if (started)
+            return;
+
+        onEnter(key);
+        started = true;
+    }
 }

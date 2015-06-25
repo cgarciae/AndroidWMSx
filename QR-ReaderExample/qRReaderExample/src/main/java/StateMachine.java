@@ -36,15 +36,15 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
     }
 
     @Override
-    public void onEnter(K value) {
-        super.onEnter(value);
-        state.onEnter(state.key);
+    public void onEnter(B event, K oldKey) {
+        super.onEnter(event, oldKey);
+        state.onEnter(event, state.key);
     }
 
     @Override
-    public void onExit(K value) {
-        super.onExit(value);
-        state.onExit(state.key);
+    public void onExit(B event, K newKey) {
+        super.onExit(event, newKey);
+        state.onExit(event, state.key);
     }
 
     public void addState (StateBehaviour<A,B> newState) throws Exception{
@@ -73,9 +73,9 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
         return super.move(value);
     }
 
-    private void handleData (B value) {
+    private void handleData (B event) {
         //Pasar datos al estado actual
-        A newKey = state.move(value);
+        A newKey = state.move(event);
 
         //Parar si el "key" es el mismo
         if (newKey == state.key)
@@ -85,8 +85,8 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
         StateBehaviour<A,B> newState = stateMap.get(newKey);
 
         //Anunciar salida y entrada en cambio de estado
-        state.onExit(newKey);
-        newState.onEnter(state.key);
+        state.onExit(event, newKey);
+        newState.onEnter(event, state.key);
 
         //Cambiar estado
         state = newState;
@@ -95,11 +95,6 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
         for (Action1<A> f : new LinkedList<> (onDataListeners)) {
             f.apply (newKey);
         }
-    }
-
-    @Override
-    public K getKey() {
-        return key;
     }
 
     @Override
@@ -113,8 +108,24 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
     }
 }
 
+interface Action {
+    void apply();
+}
+
 interface Action1<A> {
     void apply(A value);
+}
+
+interface Action2<A,B> {
+    void apply(A v1, B v2);
+}
+
+interface Action3<A,B,C> {
+    void apply(A v1, B v2, C v3);
+}
+
+interface Func<A> {
+    A apply();
 }
 
 interface Func1<A,B> {
@@ -123,6 +134,10 @@ interface Func1<A,B> {
 
 interface Func2<A,B,C> {
     C apply(A v1, B v2);
+}
+
+interface Func3<A,B,C,D> {
+    D apply(A v1, B v2, C v3);
 }
 
 interface Stream<A> {

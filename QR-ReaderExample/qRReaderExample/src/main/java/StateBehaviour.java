@@ -7,10 +7,10 @@ import java.util.ArrayList;
 public class StateBehaviour<A,B> {
 
     public final A key;
-    private ArrayList<Action1<A>> onEnterList = new ArrayList<Action1<A>>();
-    private ArrayList<Action1<A>> onExitList = new ArrayList<Action1<A>>();
-    private ArrayList<Action1<B>> onDataList = new ArrayList<Action1<B>> ();
-    private ArrayList<Func1<B,A>> transitions = new ArrayList<Func1<B,A>>();
+    private ArrayList<Action2<B,A>> onEnterList = new ArrayList<>();
+    private ArrayList<Action2<B,A>> onExitList = new ArrayList<>();
+    private ArrayList<Action2<B,A>> onDataList = new ArrayList<> ();
+    private ArrayList<Func2<B,A,A>> transitions = new ArrayList<>();
     protected Boolean started = false;
 
 
@@ -18,17 +18,21 @@ public class StateBehaviour<A,B> {
         this.key = key;
     }
 
+    public A getKey() {
+        return key;
+    }
+
     /**
      * [move] recibe
      */
     public A move(B value) {
 
-        for (Action1<B> f : new ArrayList<Action1<B>>(onDataList)) {
-            f.apply (value);
+        for (Action2<B,A> f : new ArrayList<>(onDataList)) {
+            f.apply (value, key);
         }
 
-        for (Func1<B,A> f : new ArrayList<Func1<B,A>> (transitions)) {
-            A a = f.apply(value);
+        for (Func2<B,A,A> f : new ArrayList<> (transitions)) {
+            A a = f.apply(value, key);
 
             if (a != key)
                 return a;
@@ -37,54 +41,54 @@ public class StateBehaviour<A,B> {
         return key;
     }
 
-    public void onEnter (A value) {
-        for (Action1<A> f : new ArrayList<Action1<A>> (onEnterList)) {
-            f.apply (value);
+    public void onEnter (B event, A oldKey) {
+        for (Action2<B,A> f : new ArrayList<> (onEnterList)) {
+            f.apply (event, oldKey);
         }
     }
 
-    public void onExit (A value) {
-        for (Action1<A> f : new ArrayList<Action1<A>> (onExitList)) {
-            f.apply (value);
+    public void onExit (B event, A newKey) {
+        for (Action2<B,A> f : new ArrayList<> (onExitList)) {
+            f.apply (event, newKey);
         }
     }
 
-    public StateBehaviour<A,B> addOnEnterListener (Action1<A> reactive) {
-        onEnterList.add(reactive);
+    public StateBehaviour<A,B> addOnEnterListener (Action2<B,A> listener) {
+        onEnterList.add(listener);
         return this;
     }
 
-    public StateBehaviour<A,B> removeOnEnterListener (Action1<A> reactive) {
-        onEnterList.remove(reactive);
+    public StateBehaviour<A,B> removeOnEnterListener (Action2<B,A> listener) {
+        onEnterList.remove(listener);
         return this;
     }
 
-    public StateBehaviour<A,B> addOnExitListener (Action1<A> reactive) {
+    public StateBehaviour<A,B> addOnExitListener (Action2<B,A> reactive) {
         onExitList.add(reactive);
         return this;
     }
 
-    public StateBehaviour<A,B> removeOnExitListener (Action1<A> reactive) {
+    public StateBehaviour<A,B> removeOnExitListener (Action2<B,A> reactive) {
         onEnterList.remove(reactive);
         return this;
     }
 
-    public StateBehaviour<A,B> addTransition (Func1<B,A> transition) {
+    public StateBehaviour<A,B> addTransition (Func2<B,A,A> transition) {
         transitions.add(transition);
         return this;
     }
 
-    public StateBehaviour<A,B> removeTransition (Func1<B,A> transition) {
+    public StateBehaviour<A,B> removeTransition (Func2<B,A,A> transition) {
         transitions.remove(transition);
         return this;
     }
 
-    public StateBehaviour<A,B> addOnDataListener (Action1<B> action) {
+    public StateBehaviour<A,B> addOnDataListener (Action2<B,A> action) {
         onDataList.add(action);
         return this;
     }
 
-    public StateBehaviour<A,B> removeOnDataListener (Action1<B> action) {
+    public StateBehaviour<A,B> removeOnDataListener (Action2<B,A> action) {
         onDataList.remove(action);
         return this;
     }
@@ -94,7 +98,7 @@ public class StateBehaviour<A,B> {
         if (started)
             return;
 
-        onEnter(key);
+        onEnter(null, key);
         started = true;
     }
 }

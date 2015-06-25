@@ -16,12 +16,12 @@ public class StateMachineTest extends TestCase {
         stateTwo = new StateBehaviour<State, Direction>(State.Two);
         stateMachine = new StateMachine<State, State, Direction>(State.Zero, stateOne, [stateTwo] as StateBehaviour[]);
 
-        stateOne.addTransition({Direction n ->
-            n > Direction.None ? State.Two : State.One;
+        stateOne.addTransition({Direction n, State currentKey ->
+            n > Direction.None ? State.Two : currentKey;
         });
 
-        stateTwo.addTransition({Direction n ->
-            n < Direction.None ? State.One : State.Two;
+        stateTwo.addTransition({Direction n, State currentKey ->
+            n < Direction.None ? State.One : currentKey;
         });
     }
 
@@ -36,8 +36,8 @@ public class StateMachineTest extends TestCase {
         State result = State.Zero;
 
         //Agregar onEnter listener al estado inicial
-        stateOne.addOnEnterListener({State value ->
-            result = value;
+        stateOne.addOnEnterListener({Direction direction, State oldState ->
+            result = oldState;
         });
 
         //Verificar que "result" no haya cambiado
@@ -62,12 +62,12 @@ public class StateMachineTest extends TestCase {
     public void testOnExitEnter() throws Exception {
         Boolean exited = false;
         Boolean entered = false;
-        stateOne.addOnExitListener({State newState ->
+        stateOne.addOnExitListener({direction, State newState ->
             exited = true;
             assertEquals(newState, State.Two);
         });
 
-        stateTwo.addOnEnterListener({State oldState ->
+        stateTwo.addOnEnterListener({direction, State oldState ->
             entered = true;
             assertEquals(oldState, State.One);
         });
@@ -80,7 +80,7 @@ public class StateMachineTest extends TestCase {
 
     public void testOnData () {
         Boolean called = false;
-        stateOne.addOnDataListener({Direction dir ->
+        stateOne.addOnDataListener({Direction dir, state ->
             called = true;
         });
 

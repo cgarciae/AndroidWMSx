@@ -34,14 +34,18 @@ public class StateMachineTest extends TestCase {
     public void testStart() throws Exception {
         //Resultado Inicial
         State result = State.Zero;
+
         //Agregar onEnter listener al estado inicial
         stateOne.addOnEnterListener({State value ->
             result = value;
         });
+
         //Verificar que "result" no haya cambiado
         assertEquals(result != stateOne.key, true);
+
         //Iniciar la maquina, se debe ejecutar "onEnter"
         stateMachine.start();
+
         //Verificar result sea la "key" del estado inicial, tal como se definio en la lambda
         assertEquals(result, stateOne.key);
     }

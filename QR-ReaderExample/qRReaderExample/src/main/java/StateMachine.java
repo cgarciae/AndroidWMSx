@@ -8,8 +8,8 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
 
     public final StateBehaviour<A,B> initialState;
     private StateBehaviour<A,B> state;
-    HashMap<A,StateBehaviour<A,B>> stateMap = new HashMap<>();
-    LinkedList<Action1<A>> onDataListeners = new LinkedList<>();
+    private HashMap<A,StateBehaviour<A,B>> stateMap = new HashMap<>();
+    private LinkedList<Action1<A>> onDataListeners = new LinkedList<>();
 
 
     public StateMachine (K key, StateBehaviour<A,B> initialState, StateBehaviour<A,B>... states) throws Exception {
@@ -73,7 +73,7 @@ public class StateMachine<K,A,B> extends StateBehaviour<K,B> implements Stream<A
         return super.move(value);
     }
 
-    void handleData (B value) {
+    private void handleData (B value) {
         //Pasar datos al estado actual
         A newKey = state.move(value);
 
